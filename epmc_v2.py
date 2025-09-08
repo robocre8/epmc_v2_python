@@ -116,29 +116,25 @@ class EPMC_V2:
         return int(mode)
     
     #---------------------------------------------------------------------
-
-    def setUseIMU(self, val):
-        res = self.write_data(SET_USE_IMU, 0, val)
-        return int(res)
-    
+        
     def getUseIMU(self):
         val = self.read_data(GET_USE_IMU, 0)
         return val
     
     def readAcc(self):
         ax, ay, az, _ = self.read_data_stream(READ_ACC)
-        return ax, ay, az
+        return round(ax,6), round(ay,6), round(az,6)
     
     def readAccVariance(self):
         ax, ay, az, _ = self.read_data_stream(READ_ACC_VAR)
-        return ax, ay, az
+        return round(ax,6), round(ay,6), round(az,6)
     
     def readGyro(self):
         gx, gy, gz, _ = self.read_data_stream(READ_GYRO)
-        return gx, gy, gz
+        return round(gx,6), round(gy,6), round(gz,6)
     
     def readGyroVariance(self):
         gx, gy, gz, _ = self.read_data_stream(READ_GYRO_VAR)
-        return gx, gy, gz
+        return round(gx,6), round(gy,6), round(gz,6)
     
-    #####################################################
+    #---------------------------------------------------------------------
