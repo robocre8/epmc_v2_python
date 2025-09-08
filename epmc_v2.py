@@ -1,90 +1,144 @@
 import serial
-import time
+import struct
+
+
+# Serial Protocol Command IDs -------------
+START_BYTE = 0xAA
+WRITE_VEL = 0x01
+WRITE_PWM = 0x02
+READ_POS = 0x03
+READ_VEL = 0x04
+READ_UVEL = 0x05
+SET_PID_MODE = 0x15
+GET_PID_MODE = 0x16
+SET_CMD_TIMEOUT = 0x17
+GET_CMD_TIMEOUT = 0x18
+SET_USE_IMU = 0x1C
+GET_USE_IMU = 0x1D
+READ_ACC = 0x1E
+READ_ACC_VAR = 0x21
+READ_GYRO = 0x24
+READ_GYRO_VAR = 0x27
+#---------------------------------------------
+
+
 
 class EPMC_V2:
-    def __init__(self, port, baud=115200, timeOut=0.1):
+    def __init__(self, port, baud=921600, timeOut=0.1):
         self.ser = serial.Serial(port, baud, timeout=timeOut)
     
-    def send_and_receive(self, msg_cmd):
-        data = ""
-        prev_time = time.time()
-        while data=="":
-            try:
-                self.ser.write(msg_cmd.encode())   # send a single or multiple byte    
-                data = self.ser.readline().decode().strip()
-                if time.time()-prev_time > 2.0:
-                    print("[Timeout] No response from ESP32")
-                    raise Exception("[Timeout] No response from ESP32")
-            except:
-                print("[Timeout] No response from ESP32")
-                raise Exception("[Timeout] No response from ESP32")
-        return data
+    #------------------------------------------------------------------------
+    def send_packet(self, cmd):
+        length = 0
+        packet = bytearray([START_BYTE, cmd, length])
+        checksum = sum(packet) & 0xFF
+        packet.append(checksum)
+        self.ser.write(packet)
+
+    def send_packet_stream(self, cmd, payload_bytes):
+        length = len(payload_bytes)
+        packet = bytearray([START_BYTE, cmd, length]) + payload_bytes
+        checksum = sum(packet) & 0xFF
+        packet.append(checksum)
+        self.ser.write(packet)
+
+    def read_packet(self):
+        payload = self.ser.read(4)
+        a = struct.unpack('<f', payload)[0]  # little-endian float
+        return a
+
+    def read_packet_stream(self):
+        payload = self.ser.read(16)
+        a, b, c, d = struct.unpack('<ffff', payload)  # little-endian float
+        return a, b, c, d
     
-    def send(self, cmd_route, motor_no, val):
-        cmd_str = cmd_route+","+str(motor_no)+","+str(val)
-        data = self.send_and_receive(cmd_str)
-        if data == "1":
-            return True
-        else:
-            return False
-  
-    def get(self, cmd_route, motor_no):
-        cmd_str = cmd_route+","+str(motor_no)
-        data = self.send_and_receive(cmd_str).split(',')
-        return float(data[0])
+    #---------------------------------------------------------------------
+
+    def write_data(self, cmd, pos, val):
+        payload = struct.pack('<Bf', pos, val)
+        self.send_packet_stream(cmd, payload)
+        val = self.read_packet()
+        return val
+
+    def read_data(self, cmd, pos):
+        payload = struct.pack('<Bf', pos, 0.0)  # big-endian
+        self.send_packet_stream(cmd, payload)
+        val = self.read_packet()
+        return val
+
+    def write_data_stream(self, cmd, a, b, c, d):
+        payload = struct.pack('<ffff', a,b,c,d) 
+        self.send_packet_stream(cmd, payload)
+        val = self.read_packet()
+        return val
+
+    def read_data_stream(self, cmd):
+        self.send_packet(cmd)
+        a, b, c, d = self.read_packet_stream()
+        return a, b, c, d
         
-    def readPos(self, motor_no):
-        pos = self.get("/pos", motor_no)
-        return pos
+    #---------------------------------------------------------------------
+
+    def writeSpeed(self, v0, v1, v2, v3):
+        res = self.write_data_stream(WRITE_VEL, v0, v1, v2, v3)
+        return int(res)
     
-    def readVel(self, motor_no):
-        filteredVel = self.get("/vel", motor_no)
-        return filteredVel
+    def writePWM(self, v0, v1, v2, v3):
+        res = self.write_data_stream(WRITE_PWM, v0, v1, v2, v3)
+        return int(res)
     
-    def readUVel(self, motor_no):
-        unfilteredVel = self.get("/u-vel", motor_no)
-        return unfilteredVel
+    def readPos(self):
+        pos0, pos1, pos2, pos3 = self.read_data_stream(READ_POS)
+        return round(pos0,4), round(pos1,4), round(pos2,4), round(pos3,4)
     
-    def writePWM(self, motor_no, pwm):
-        res = self.send("/pwm", motor_no, pwm)
-        return res
+    def readVel(self):
+        v0, v1, v2, v3 = self.read_data_stream(READ_VEL)
+        return round(v0,6), round(v1,6), round(v2,6), round(v3,6)
     
-    def writeSpeed(self, motor_no, speed):
-        res = self.send("/vel", motor_no, speed)
-        return res
+    def readUVel(self):
+        v0, v1, v2, v3 = self.read_data_stream(READ_UVEL)
+        return round(v0,6), round(v1,6), round(v2,6), round(v3,6)
     
     def setCmdTimeout(self, timeout):
-        res = self.send("/timeout", -1, timeout)
-        return res
+        res = self.write_data(SET_CMD_TIMEOUT, 0, timeout)
+        return int(res)
     
     def getCmdTimeout(self):
-        timeout = self.get("/timeout", -1)
-        return timeout
+        timeout = self.read_data(GET_CMD_TIMEOUT, 0)
+        return int(timeout)
     
     def setPidMode(self, motor_no, mode):
-        res = self.send("/mode", motor_no, mode)
-        return res
+        res = self.write_data(SET_PID_MODE, motor_no, mode)
+        return int(res)
     
     def getPidMode(self, motor_no):
-        mode = self.get("/mode", motor_no)
-        return mode
+        mode = self.read_data(GET_CMD_TIMEOUT, motor_no)
+        return int(mode)
+    
+    #---------------------------------------------------------------------
+
+    def setUseIMU(self, val):
+        res = self.write_data(SET_USE_IMU, 0, val)
+        return int(res)
     
     def getUseIMU(self):
-        val = self.get("/use-imu", -1)
+        val = self.read_data(GET_USE_IMU, 0)
         return val
     
-    def readAcc(self, pos_no):
-        val = self.get("/acc", pos_no)
-        return val
+    def readAcc(self):
+        ax, ay, az, _ = self.read_data_stream(READ_ACC)
+        return ax, ay, az
     
-    def readAccVariance(self, pos_no):
-        val = self.get("/acc-var", pos_no)
-        return val
+    def readAccVariance(self):
+        ax, ay, az, _ = self.read_data_stream(READ_ACC_VAR)
+        return ax, ay, az
     
-    def readGyro(self, pos_no):
-        val = self.get("/gyro", pos_no)
-        return val
+    def readGyro(self):
+        gx, gy, gz, _ = self.read_data_stream(READ_GYRO)
+        return gx, gy, gz
     
-    def readGyroVariance(self, pos_no):
-        val = self.get("/gyro-var", pos_no)
-        return val
+    def readGyroVariance(self):
+        gx, gy, gz, _ = self.read_data_stream(READ_GYRO_VAR)
+        return gx, gy, gz
+    
+    #####################################################
