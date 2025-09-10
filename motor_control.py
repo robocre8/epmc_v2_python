@@ -59,8 +59,10 @@ if __name__ == '__main__':
       try:
         # left wheels (motor 0 and motor 2)
         # right wheels (motor 1 and motor 3)
-        pos0, pos1, pos2, pos3 = epmcV2.readPos()
-        v0, v1, v2, v3 = epmcV2.readVel()
+        # pos0, pos1, pos2, pos3 = epmcV2.readPos()
+        # v0, v1, v2, v3 = epmcV2.readVel()
+
+        pos0, pos1, pos2, pos3, v0, v1, v2, v3 = epmcV2.readMotorData()
         
         print("-----------------------------------------")
         print("left wheels - motor 0 and motor 2")

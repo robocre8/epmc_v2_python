@@ -17,8 +17,9 @@ def main():
       try:
         use_imu = epmcV2.getUseIMU()
         if(use_imu == 1):
-          ax, ay, az = epmcV2.readAcc()
-          gx, gy, gz = epmcV2.readGyro()
+          # ax, ay, az = epmcV2.readAcc()
+          # gx, gy, gz = epmcV2.readGyro()
+          ax, ay, az, gx, gy, gz = epmcV2.readImuData()
 
           print(f"ax: {ax}\tay: {ay}\taz: {az}")
           print(f"gx: {gx}\tgy: {gy}\tgz: {gz}\n")
