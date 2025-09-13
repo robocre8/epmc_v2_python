@@ -9,22 +9,18 @@ if __name__ == '__main__':
   time.sleep(2.0)
 
   # left wheels (motor 0 and motor 2)
-  epmcV2.writeSpeed(0, 0.00)
-  epmcV2.writeSpeed(2, 0.00)
-
   # right wheels (motor 1 and motor 3)
-  epmcV2.writeSpeed(1, 0.00)
-  epmcV2.writeSpeed(3, 0.00)
+  epmcV2.writeSpeed(0.0, 0.0, 0.0, 0.0)
 
-  # epmcV2.setCmdTimeout(0)
-  # timeout = epmcV2.getCmdTimeout()
-  # print("command timeout in ms: ", timeout)
+  epmcV2.setCmdTimeout(0)
+  timeout = epmcV2.getCmdTimeout()
+  print("command timeout in ms: ", timeout)
 
   lowTargetVel = 0.00 # in rad/sec
   highTargetVel = 3.142 # in rad/sec
 
   prevTime = None
-  sampleTime = 0.05
+  sampleTime = 0.02
 
   ctrlPrevTime = None
   ctrlSampleTime = 4.0
@@ -32,12 +28,8 @@ if __name__ == '__main__':
 
 
   # left wheels (motor 0 and motor 2)
-  epmcV2.writeSpeed(0, lowTargetVel)
-  epmcV2.writeSpeed(2, lowTargetVel)
-
   # right wheels (motor 1 and motor 3)
-  epmcV2.writeSpeed(1, lowTargetVel)
-  epmcV2.writeSpeed(3, lowTargetVel)
+  epmcV2.writeSpeed(lowTargetVel, lowTargetVel, lowTargetVel, lowTargetVel)
 
   sendHigh = True
 
@@ -48,22 +40,14 @@ if __name__ == '__main__':
     if time.time() - ctrlPrevTime > ctrlSampleTime:
       if sendHigh:
         # left wheels (motor 0 and motor 2)
-        epmcV2.writeSpeed(0, highTargetVel)
-        epmcV2.writeSpeed(2, highTargetVel)
-
         # right wheels (motor 1 and motor 3)
-        epmcV2.writeSpeed(1, highTargetVel)
-        epmcV2.writeSpeed(3, highTargetVel)
+        epmcV2.writeSpeed(highTargetVel, highTargetVel, highTargetVel, highTargetVel)
 
         sendHigh = False
       else:
         # left wheels (motor 0 and motor 2)
-        epmcV2.writeSpeed(0, lowTargetVel)
-        epmcV2.writeSpeed(2, lowTargetVel)
-
         # right wheels (motor 1 and motor 3)
-        epmcV2.writeSpeed(1, lowTargetVel)
-        epmcV2.writeSpeed(3, lowTargetVel)
+        epmcV2.writeSpeed(lowTargetVel, lowTargetVel, lowTargetVel, lowTargetVel)
 
         sendHigh = True
       
@@ -74,27 +58,20 @@ if __name__ == '__main__':
     if time.time() - prevTime > sampleTime:
       try:
         # left wheels (motor 0 and motor 2)
-        angPos0 = epmcV2.readPos(0)
-        angVel0 = epmcV2.readVel(0)
-
-        angPos2 = epmcV2.readPos(2)
-        angVel2 = epmcV2.readVel(2)
-
         # right wheels (motor 1 and motor 3)
-        angPos1 = epmcV2.readPos(1)
-        angVel1 = epmcV2.readVel(1)
+        # pos0, pos1, pos2, pos3 = epmcV2.readPos()
+        # v0, v1, v2, v3 = epmcV2.readVel()
 
-        angPos3 = epmcV2.readPos(3)
-        angVel3 = epmcV2.readVel(3)
+        pos0, pos1, pos2, pos3, v0, v1, v2, v3 = epmcV2.readMotorData()
         
         print("-----------------------------------------")
         print("left wheels - motor 0 and motor 2")
-        print(f"motor0_readings: [{angPos0}, {angVel0}]")
-        print(f"motor2_readings: [{angPos2}, {angVel2}]\n")
+        print(f"motor0_readings: [{pos0}, {v0}]")
+        print(f"motor2_readings: [{pos2}, {v2}]\n")
 
         print("right wheels - motor 1 and motor 3")
-        print(f"motor1_readings: [{angPos1}, {angVel1}]")
-        print(f"motor3_readings: [{angPos3}, {angVel3}]")
+        print(f"motor1_readings: [{pos1}, {v1}]")
+        print(f"motor3_readings: [{pos3}, {v3}]")
         print("-----------------------------------------\n")
 
       except:
