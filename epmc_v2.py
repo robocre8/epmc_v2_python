@@ -14,6 +14,7 @@ GET_PID_MODE = 0x16
 SET_CMD_TIMEOUT = 0x17
 GET_CMD_TIMEOUT = 0x18
 READ_MOTOR_DATA = 0x2A
+CLEAR_DATA_BUFFER = 0x2B
 #---------------------------------------------
 
 
@@ -145,6 +146,10 @@ class EPMC_V2:
     def getPidMode(self, motor_no):
         mode = self.read_data1(GET_CMD_TIMEOUT, motor_no)
         return int(mode)
+    
+    def clearDataBuffer(self):
+        res = self.write_data1(CLEAR_DATA_BUFFER, 0, 0.0)
+        return int(res)
     
     #---------------------------------------------------------------------
 

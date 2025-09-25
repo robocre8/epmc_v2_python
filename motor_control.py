@@ -11,8 +11,9 @@ if __name__ == '__main__':
   # left wheels (motor 0 and motor 2)
   # right wheels (motor 1 and motor 3)
   epmcV2.writeSpeed(0.0, 0.0, 0.0, 0.0)
+  epmcV2.clearDataBuffer()
 
-  epmcV2.setCmdTimeout(0)
+  epmcV2.setCmdTimeout(6000)
   timeout = epmcV2.getCmdTimeout()
   print("command timeout in ms: ", timeout)
 
