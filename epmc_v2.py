@@ -14,7 +14,7 @@ GET_PID_MODE = 0x16
 SET_CMD_TIMEOUT = 0x17
 GET_CMD_TIMEOUT = 0x18
 READ_MOTOR_DATA = 0x2A
-CLEAR_DATA_BUFFER = 0x2B
+CLEAR_DATA_BUFFER = 0x2C
 #---------------------------------------------
 
 
