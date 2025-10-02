@@ -14,7 +14,13 @@ GET_PID_MODE = 0x16
 SET_CMD_TIMEOUT = 0x17
 GET_CMD_TIMEOUT = 0x18
 READ_MOTOR_DATA = 0x2A
-CLEAR_DATA_BUFFER = 0x2B
+CLEAR_DATA_BUFFER = 0x2C
+
+GET_USE_IMU = 0x1D
+READ_RPY_VAR = 0x2E
+READ_ACC_VAR = 0x21
+READ_GYRO_VAR = 0x27
+READ_IMU_DATA = 0x2B
 #---------------------------------------------
 
 
@@ -63,6 +69,11 @@ class EPMC_V2:
         a, b, c, d, e, f, g, h = struct.unpack('<ffffffff', payload)  # little-endian float
         return a, b, c, d, e, f, g, h
     
+    def read_packet9(self):
+        payload = self.ser.read(36)
+        a, b, c, d, e, f, g, h, i = struct.unpack('<fffffffff', payload)  # little-endian float
+        return a, b, c, d, e, f, g, h, i
+    
     #---------------------------------------------------------------------
 
     def write_data1(self, cmd, pos, val):
@@ -108,6 +119,11 @@ class EPMC_V2:
         self.send_packet_without_payload(cmd)
         a, b, c, d, e, f, g, h = self.read_packet8()
         return a, b, c, d, e, f, g, h
+    
+    def read_data9(self, cmd):
+        self.send_packet_without_payload(cmd)
+        a, b, c, d, e, f, g, h, i = self.read_packet9()
+        return a, b, c, d, e, f, g, h, i
         
     #---------------------------------------------------------------------
 
@@ -156,3 +172,27 @@ class EPMC_V2:
     def readMotorData(self):
         pos0, pos1, pos2, pos3, v0, v1, v2, v3 = self.read_data8(READ_MOTOR_DATA)
         return round(pos0,4), round(pos1,4), round(pos2,4), round(pos3,4), round(v0,6), round(v1,6), round(v2,6), round(v3,6)
+    
+    #------------------------------------------------------------
+    
+    def getUseIMU(self):
+        val = self.read_data1(GET_USE_IMU, 0)
+        return val
+    
+    def readRPYVariance(self):
+        r, p, y = self.read_data3(READ_RPY_VAR)
+        return round(r,8), round(p,8), round(y,8)
+    
+    def readAccVariance(self):
+        ax, ay, az = self.read_data3(READ_ACC_VAR)
+        return round(ax,8), round(ay,8), round(az,8)
+    
+    def readGyroVariance(self):
+        gx, gy, gz = self.read_data3(READ_GYRO_VAR)
+        return round(gx,8), round(gy,8), round(gz,8)
+    
+    def readImuData(self):
+        r, p, y, ax, ay, az, gx, gy, gz = self.read_data9(READ_IMU_DATA)
+        return round(r,6), round(p,6), round(y,6), round(ax,6), round(ay,6), round(az,6), round(gx,6), round(gy,6), round(gz,6)
+        
+    #------------------------------------------------------
