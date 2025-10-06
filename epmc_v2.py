@@ -91,8 +91,6 @@ class EPMC_V2:
     def write_data4(self, cmd, a, b, c, d):
         payload = struct.pack('<ffff', a,b,c,d) 
         self.send_packet_with_payload(cmd, payload)
-        val = self.read_packet1()
-        return val
 
     def read_data4(self, cmd):
         self.send_packet_without_payload(cmd)
@@ -112,12 +110,10 @@ class EPMC_V2:
     #---------------------------------------------------------------------
 
     def writeSpeed(self, v0, v1, v2, v3):
-        res = self.write_data4(WRITE_VEL, v0, v1, v2, v3)
-        return int(res)
+        self.write_data4(WRITE_VEL, v0, v1, v2, v3)
     
     def writePWM(self, v0, v1, v2, v3):
-        res = self.write_data4(WRITE_PWM, v0, v1, v2, v3)
-        return int(res)
+        self.write_data4(WRITE_PWM, v0, v1, v2, v3)
     
     def readPos(self):
         pos0, pos1, pos2, pos3 = self.read_data4(READ_POS)
