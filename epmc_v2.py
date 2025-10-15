@@ -232,10 +232,6 @@ class EPMC_V2:
         success, vel_arr = self.read_data4(READ_UVEL)
         return success, vel_arr
     
-    def readTVel(self):
-        success, vel_arr = self.read_data4(READ_TVEL)
-        return success, vel_arr
-    
     def setCmdTimeout(self, timeout):
         success, res = self.write_data1(SET_CMD_TIMEOUT, 100, timeout)
         return success
