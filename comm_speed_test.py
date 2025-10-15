@@ -27,37 +27,24 @@ angVel1 = 0.0
 angVel2 = 0.0
 angVel3 = 0.0
 
-lowTargetVel = -10.00 # in rad/sec
-highTargetVel = 10.00 # in rad/sec
+lowTargetVel = -3.142 # in rad/sec
+highTargetVel = 3.142 # in rad/sec
 
 prevTime = None
 sampleTime = 0.015
 
 ctrlPrevTime = None
-ctrlSampleTime = 4.0
+ctrlSampleTime = 5.0
 sendHigh = True
 
-
-motorControl.writeSpeed(lowTargetVel, lowTargetVel, lowTargetVel, lowTargetVel) # targetA, targetB
 sendHigh = True
 
 prevTime = time.time()
 ctrlPrevTime = time.time()
 while True:
-  if time.time() - ctrlPrevTime > ctrlSampleTime:
-    if sendHigh:
-      motorControl.writeSpeed(highTargetVel, highTargetVel, highTargetVel, highTargetVel) # targetA, targetB
-      sendHigh = False
-    else:
-      motorControl.writeSpeed(lowTargetVel, lowTargetVel, lowTargetVel, lowTargetVel) # targetA, targetB
-      sendHigh = True
-    
-    ctrlPrevTime = time.time()
-
-
-
-  if time.time() - prevTime > sampleTime:
     try:
+      start_time = time.time()
+      motorControl.writeSpeed(highTargetVel, highTargetVel, highTargetVel, highTargetVel) # targetA, targetB
       success, motor_data = motorControl.readMotorData()
       if success:
         angPos0 = round(motor_data[0], 2)
@@ -69,13 +56,10 @@ while True:
         angVel1 = round(motor_data[5], 4)
         angVel2 = round(motor_data[6], 4)
         angVel3 = round(motor_data[7], 4)
-
-      print(f"motor0_readings: [{angPos0}, {angVel0}]")
-      print(f"motor1_readings: [{angPos1}, {angVel1}]")
-      print(f"motor2_readings: [{angPos2}, {angVel2}]")
-      print(f"motor3_readings: [{angPos3}, {angVel3}]")
-      print("")
+      dt = start_time - prevTime
+      prevTime = start_time
+      print(dt)
     except:
-      pass
-    
-    prevTime = time.time()
+       pass
+
+
