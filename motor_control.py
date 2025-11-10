@@ -1,44 +1,33 @@
 from epmc_v2 import EPMC_V2
 import time
 
-
-motorControl = EPMC_V2('/dev/ttyUSB0')
-
-#wait for the EPMC to fully setup
-for i in range(4):
-  time.sleep(1.0)
-  print(f'configuring controller: {i+1} sec')
-
-motorControl.clearDataBuffer()
-motorControl.writeSpeed(0.0, 0.0, 0.0, 0.0)
-print('configuration complete')
-
-motorControl.setCmdTimeout(5000)
-timeout = motorControl.getCmdTimeout()
-print("command timeout in ms: ", timeout)
-
-angPos0 = 0.0
-angPos1 = 0.0
-angPos2 = 0.0
-angPos3 = 0.0
-
-angVel0 = 0.0
-angVel1 = 0.0
-angVel2 = 0.0
-angVel3 = 0.0
-
-lowTargetVel = -10.00 # in rad/sec
-highTargetVel = 10.00 # in rad/sec
+lowTargetVel = 0.00 # in rad/sec
+highTargetVel = 5.00 # in rad/sec
 
 prevTime = None
 sampleTime = 0.015
 
 ctrlPrevTime = None
-ctrlSampleTime = 4.0
+ctrlSampleTime = 5.0
 sendHigh = True
 
+motorControl = EPMC_V2('/dev/ttyACM0')
 
-motorControl.writeSpeed(lowTargetVel, lowTargetVel, lowTargetVel, lowTargetVel) # targetA, targetB
+#wait for the EPMC to fully setup
+for i in range(3):
+  time.sleep(1.0)
+  print(f'configuring controller: {i+1} sec')
+
+motorControl.clearDataBuffer()
+motorControl.writeSpeed(0.0, 0.0)
+print('configuration complete')
+
+motorControl.setCmdTimeout(10000)
+timeout = motorControl.getCmdTimeout()
+print("command timeout in ms: ", timeout)
+
+
+motorControl.writeSpeed(lowTargetVel, lowTargetVel) # targetA, targetB
 sendHigh = True
 
 prevTime = time.time()
@@ -46,11 +35,15 @@ ctrlPrevTime = time.time()
 while True:
   if time.time() - ctrlPrevTime > ctrlSampleTime:
     if sendHigh:
-      motorControl.writeSpeed(highTargetVel, highTargetVel, highTargetVel, highTargetVel) # targetA, targetB
+      print("command high")
+      motorControl.writeSpeed(highTargetVel, highTargetVel) # targetA, targetB
+      highTargetVel = highTargetVel*-1
       sendHigh = False
     else:
-      motorControl.writeSpeed(lowTargetVel, lowTargetVel, lowTargetVel, lowTargetVel) # targetA, targetB
+      print("command low")
+      motorControl.writeSpeed(lowTargetVel, lowTargetVel) # targetA, targetB
       sendHigh = True
+    
     
     ctrlPrevTime = time.time()
 
@@ -58,22 +51,10 @@ while True:
 
   if time.time() - prevTime > sampleTime:
     try:
-      success, motor_data = motorControl.readMotorData()
-      if success:
-        angPos0 = round(motor_data[0], 2)
-        angPos1 = round(motor_data[1], 2)
-        angPos2 = round(motor_data[2], 2)
-        angPos3 = round(motor_data[3], 2)
+      pos0, pos1, v0, v1 = motorControl.readMotorData()
 
-        angVel0 = round(motor_data[4], 4)
-        angVel1 = round(motor_data[5], 4)
-        angVel2 = round(motor_data[6], 4)
-        angVel3 = round(motor_data[7], 4)
-
-      print(f"motor0_readings: [{angPos0}, {angVel0}]")
-      print(f"motor1_readings: [{angPos1}, {angVel1}]")
-      print(f"motor2_readings: [{angPos2}, {angVel2}]")
-      print(f"motor3_readings: [{angPos3}, {angVel3}]")
+      print(f"motor0_readings: [{pos0}, {v0}]")
+      print(f"motor1_readings: [{pos1}, {v1}]")
       print("")
     except:
       pass
