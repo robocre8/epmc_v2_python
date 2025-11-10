@@ -65,58 +65,42 @@ class EPMC_V2:
         Reads 4 bytes from the serial port and converts to a float (little-endian).
         Returns (success, value-array)
         """
+        payload = self.ser.read(4)
+        if len(payload) != 4:
+            print("[EPMC SERIAL ERROR]: Timeout while reading 1 values")
+            raise EPMCSerialError("[EPMC SERIAL ERROR]: Timeout while reading 1 value")
 
-        try:
-            payload = self.ser.read(4)
-            if len(payload) != 4:
-                print("[EPMC SERIAL ERROR]: Timeout while reading 1 values")
-                raise EPMCSerialError("[EPMC SERIAL ERROR]: Timeout while reading 1 value")
+        # Unpack 4 bytes as little-endian float
+        (val,) = struct.unpack('<f', payload)
+        return val
 
-            # Unpack 4 bytes as little-endian float
-            (val,) = struct.unpack('<f', payload)
-            return val
-
-        except serial.SerialException as e:
-            print("[PY_SERIAL ERROR]: could not read val")
-            raise e
-        
     def read_packet2(self):
         """
         Reads 8 bytes from the serial port and converts to a float (little-endian).
         Returns (success, value-array)
         """
-        try:
-            payload = self.ser.read(8)
-            if len(payload) != 8:
-                print("[EPMC SERIAL ERROR]: Timeout while reading 2 values")
-                raise EPMCSerialError("[EPMC SERIAL ERROR]: Timeout while reading 2 values")
+        payload = self.ser.read(8)
+        if len(payload) != 8:
+            print("[EPMC SERIAL ERROR]: Timeout while reading 2 values")
+            raise EPMCSerialError("[EPMC SERIAL ERROR]: Timeout while reading 2 values")
 
-            # Unpack 4 bytes as little-endian float
-            a, b = struct.unpack('<ff', payload)
-            return a, b
-
-        except serial.SerialException as e:
-            print("[PY_SERIAL ERROR]: could not read val")
-            raise e
+        # Unpack 4 bytes as little-endian float
+        a, b = struct.unpack('<ff', payload)
+        return a, b
     
     def read_packet4(self):
         """
         Reads 16 bytes from the serial port and converts to a float (little-endian).
         Returns (success, value-array)
         """
-        try:
-            payload = self.ser.read(16)
-            if len(payload) != 16:
-                print("[EPMC SERIAL ERROR]: Timeout while reading 4 values")
-                raise EPMCSerialError("[EPMC SERIAL ERROR]: Timeout while reading 4 values")
+        payload = self.ser.read(16)
+        if len(payload) != 16:
+            print("[EPMC SERIAL ERROR]: Timeout while reading 4 values")
+            raise EPMCSerialError("[EPMC SERIAL ERROR]: Timeout while reading 4 values")
 
-            # Unpack 4 bytes as little-endian float
-            a, b, c, d = struct.unpack('<ffff', payload)
-            return a, b, c, d
-
-        except serial.SerialException as e:
-            print("[PY_SERIAL ERROR]: could not read val")
-            raise e
+        # Unpack 4 bytes as little-endian float
+        a, b, c, d = struct.unpack('<ffff', payload)
+        return a, b, c, d
     
     #---------------------------------------------------------------------
 
