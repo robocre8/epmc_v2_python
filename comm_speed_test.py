@@ -2,7 +2,7 @@ from epmc_v2 import EPMC_V2
 import time
 
 
-motorControl = EPMC_V2('/dev/ttyACM0')
+motorControl = EPMC_V2('/dev/ttyUSB0')
 
 #wait for the EPMC to fully setup
 for i in range(3):
@@ -10,7 +10,7 @@ for i in range(3):
   print(f'configuring controller: {i+1} sec')
 
 motorControl.clearDataBuffer()
-motorControl.writeSpeed(0.0, 0.0)
+motorControl.writeSpeed(0.0, 0.0, 0.0, 0.0)
 print('configuration complete')
 
 motorControl.setCmdTimeout(5000)
@@ -34,8 +34,8 @@ ctrlPrevTime = time.time()
 while True:
     try:
       start_time = time.time()
-      motorControl.writeSpeed(highTargetVel, highTargetVel) # targetA, targetB
-      pos0, pos1, v0, v1 = motorControl.readMotorData()
+      motorControl.writeSpeed(highTargetVel, highTargetVel, highTargetVel, highTargetVel)
+      pos0, pos1, pos2, pos3, v0, v1, v2, v3 = motorControl.readMotorData()
       dt = start_time - prevTime
       prevTime = start_time
       print(dt)

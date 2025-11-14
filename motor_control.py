@@ -11,7 +11,7 @@ ctrlPrevTime = None
 ctrlSampleTime = 5.0
 sendHigh = True
 
-motorControl = EPMC_V2('/dev/ttyACM0')
+motorControl = EPMC_V2('/dev/ttyUSB0')
 
 #wait for the EPMC to fully setup
 for i in range(3):
@@ -19,7 +19,7 @@ for i in range(3):
   print(f'configuring controller: {i+1} sec')
 
 motorControl.clearDataBuffer()
-motorControl.writeSpeed(0.0, 0.0)
+motorControl.writeSpeed(0.0, 0.0, 0.0, 0.0)
 print('configuration complete')
 
 motorControl.setCmdTimeout(10000)
@@ -27,7 +27,7 @@ timeout = motorControl.getCmdTimeout()
 print("command timeout in ms: ", timeout)
 
 
-motorControl.writeSpeed(lowTargetVel, lowTargetVel) # targetA, targetB
+motorControl.writeSpeed(lowTargetVel, lowTargetVel, lowTargetVel, lowTargetVel)
 sendHigh = True
 
 prevTime = time.time()
@@ -36,12 +36,12 @@ while True:
   if time.time() - ctrlPrevTime > ctrlSampleTime:
     if sendHigh:
       print("command high")
-      motorControl.writeSpeed(highTargetVel, highTargetVel) # targetA, targetB
+      motorControl.writeSpeed(highTargetVel, highTargetVel, highTargetVel, highTargetVel)
       highTargetVel = highTargetVel*-1
       sendHigh = False
     else:
       print("command low")
-      motorControl.writeSpeed(lowTargetVel, lowTargetVel) # targetA, targetB
+      motorControl.writeSpeed(lowTargetVel, lowTargetVel, lowTargetVel, lowTargetVel)
       sendHigh = True
     
     
@@ -51,10 +51,12 @@ while True:
 
   if time.time() - prevTime > sampleTime:
     try:
-      pos0, pos1, v0, v1 = motorControl.readMotorData()
+      pos0, pos1, pos2, pos3, v0, v1, v2, v3 = motorControl.readMotorData()
 
       print(f"motor0_readings: [{pos0}, {v0}]")
       print(f"motor1_readings: [{pos1}, {v1}]")
+      print(f"motor2_readings: [{pos2}, {v2}]")
+      print(f"motor3_readings: [{pos3}, {v3}]")
       print("")
     except:
       pass
