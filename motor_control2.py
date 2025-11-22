@@ -5,7 +5,8 @@ port = '/dev/ttyACM0'
 # port = '/dev/ttyUSB0'
 motorControl = EPMC_V2(port)
 
-targetVel = [1.571, 3.142, 6.284, 12.568]
+# [4 rev/sec, 2 rev/sec, 1 rev/sec, 0.5 rev/sec]
+targetVel = [1.571, 3.142, 6.284, 12.568] 
 vel = targetVel[1]
 v = 0.0
 
