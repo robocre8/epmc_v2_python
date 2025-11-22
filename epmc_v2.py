@@ -132,10 +132,10 @@ class EPMC_V2:
     
     #---------------------------------------------------------------------
 
-    def writeSpeed(self, v0, v1, v2, v3):
+    def writeSpeed(self, v0, v1, v2=0.0, v3=0.0):
         self.write_data4(WRITE_VEL, v0, v1, v2, v3)
     
-    def writePWM(self, pwm0, pwm1, pwm2, pwm3):
+    def writePWM(self, pwm0, pwm1, pwm2=0, pwm3=0):
         self.write_data4(WRITE_PWM, pwm0, pwm1, pwm2, pwm3)
     
     def readPos(self):

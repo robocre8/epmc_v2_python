@@ -21,7 +21,7 @@ for i in range(4):
   print(f'configuring controller: {i+1} sec')
 
 motorControl.clearDataBuffer()
-motorControl.writeSpeed(v, v, v, v)
+motorControl.writeSpeed(v, v)
 print('configuration complete')
 
 motorControl.setCmdTimeout(10000)
@@ -55,12 +55,10 @@ while True:
   if time.time() - readTime > readTimeInterval:
     try:
       motorControl.writeSpeed(v, v)
-      pos0, pos1, pos2, pos3, v0, v1, v2, v3 = motorControl.readMotorData()
+      pos0, pos1, _, _, v0, v1, _, _ = motorControl.readMotorData()
 
       print(f"motor0_readings: [{pos0}, {v0}]")
       print(f"motor1_readings: [{pos1}, {v1}]")
-      print(f"motor2_readings: [{pos2}, {v2}]")
-      print(f"motor3_readings: [{pos3}, {v3}]")
       print("")
     except:
       pass
